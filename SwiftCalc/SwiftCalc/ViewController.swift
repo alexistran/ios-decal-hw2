@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     var w: CGFloat!
     var h: CGFloat!
     
-
+    
     // IMPORTANT: Do NOT modify the name or class of resultLabel.
     //            We will be using the result label to run autograded tests.
     // MARK: The label to display our calculations
@@ -21,9 +21,13 @@ class ViewController: UIViewController {
     
     // TODO: This looks like a good place to add some data structures.
     //       One data structure is initialized below for reference.
-    var someDataStructure: [String] = [""]
+    var stringHolder: [String] = ["", ""]
+    var currFirst: Bool = true
+    var decFirst: Bool = false
+    var decSecond: Bool = false
+    var currOp: String = ""
+    var result: String = ""
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view = UIView(frame: UIScreen.main.bounds)
@@ -45,14 +49,97 @@ class ViewController: UIViewController {
     
     // TODO: A method to update your data structure(s) would be nice.
     //       Modify this one or create your own.
-    func updateSomeDataStructure(_ content: String) {
-        print("Update me like one of those PCs")
+    func addCharToString(_ content: String, _ stringNum: Int) {
+        if stringHolder[stringNum].characters.count < 7 {
+            stringHolder[stringNum] += content
+        }
+    }
+    func posOrNeg(_ stringNum: Int) {
+        if stringHolder[stringNum] == "" {
+            stringHolder[stringNum] += "-"
+            updateResultLabel("-0")
+        } else if stringHolder[stringNum] == "-" {
+            stringHolder[stringNum] = ""
+            updateResultLabel("0")
+        } else if stringHolder[stringNum].characters.count == 7 {
+            if stringHolder[stringNum][stringHolder[stringNum].startIndex] == "-" && stringHolder[stringNum].characters.count >= 1{
+                stringHolder[stringNum] = String(stringHolder[stringNum].characters.dropFirst())
+                updateResultLabel(stringHolder[stringNum])
+            }
+        } else {
+            if stringHolder[stringNum][stringHolder[stringNum].startIndex] == "-" && stringHolder[stringNum].characters.count >= 1{
+                stringHolder[stringNum] = String(stringHolder[stringNum].characters.dropFirst())
+            } else {
+                stringHolder[stringNum] = "-" + stringHolder[stringNum]
+            }
+            updateResultLabel(stringHolder[stringNum])
+        }
+    }
+    func decimal(_ stringNum: Int) {
+        if resultLabel.text == "0" || stringHolder[stringNum] == "" {
+            stringHolder[stringNum] = "0."
+        } else if resultLabel.text == "-0" {
+            stringHolder[stringNum] = "-0."
+        } else {
+            if stringNum == 0 {
+                if decFirst == false {
+                    stringHolder[stringNum] += "."
+                }
+            } else if stringNum == 1 {
+                if decSecond == false {
+                    stringHolder[stringNum] += "."
+                }
+            }
+        }
+        updateResultLabel(stringHolder[stringNum])
     }
     
+    func clearString(_ stringNum: Int) {
+        stringHolder[stringNum] = ""
+    }
+    func eq () {
+        if currOp == "+" {
+            if stringHolder[1].isEmpty {
+                result = Helper.add(stringHolder[0], stringHolder[0], decFirst, decSecond)
+                stringHolder[0] = result
+            } else {
+                result = Helper.add(stringHolder[0], stringHolder[1], decFirst, decSecond)
+                stringHolder[0] = result
+            }
+        } else if currOp == "-" {
+            if stringHolder[1].isEmpty {
+                result = Helper.sub(stringHolder[0], stringHolder[0], decFirst, decSecond)
+                stringHolder[0] = result
+            } else {
+                result = Helper.sub(stringHolder[0], stringHolder[1], decFirst, decSecond)
+                stringHolder[0] = result
+            }
+            
+        } else if currOp == "*" {
+            if stringHolder[1].isEmpty {
+                result = Helper.mult(stringHolder[0], stringHolder[0], decFirst, decSecond)
+                stringHolder[0] = result
+            } else {
+                result = Helper.mult(stringHolder[0], stringHolder[1], decFirst, decSecond)
+                stringHolder[0] = result
+            }
+        } else if currOp == "/" {
+            if stringHolder[1].isEmpty {
+                result = Helper.div(stringHolder[0], stringHolder[0])
+                stringHolder[0] = result
+            } else {
+                result = Helper.div(stringHolder[0], stringHolder[1])
+                stringHolder[0] = result
+            }
+            if floor(Double(result)!) != Double(result) {
+                decFirst = true
+            }
+        }
+    }
     // TODO: Ensure that resultLabel gets updated.
     //       Modify this one or create your own.
     func updateResultLabel(_ content: String) {
-        print("Update me like one of those PCs")
+        resultLabel.text = content
     }
     
     
@@ -80,17 +167,74 @@ class ViewController: UIViewController {
     func numberPressed(_ sender: CustomButton) {
         guard Int(sender.content) != nil else { return }
         print("The number \(sender.content) was pressed")
-        // Fill me in!
+        if currFirst == true {
+            addCharToString(sender.content, 0)
+            updateResultLabel(stringHolder[0])
+        } else {
+            addCharToString(sender.content, 1)
+            updateResultLabel(stringHolder[1])
+        }
     }
     
     // REQUIRED: The responder to an operator button being pressed.
     func operatorPressed(_ sender: CustomButton) {
-        // Fill me in!
+        print("\(sender.content) was pressed")
+        if sender.content == "C" {
+            if currFirst == true {
+                clearString(0)
+            } else {
+                clearString(1)
+            }
+            updateResultLabel("0")
+        } else if sender.content == "+/-" {
+            if currFirst == true {
+                posOrNeg(0)
+            } else {
+                posOrNeg(1)
+            }
+        } else if sender.content == "+" || sender.content == "-" || sender.content == "*" || sender.content == "/" {
+            if stringHolder[0] == "" || stringHolder[0] == "-" {
+                stringHolder[0] += "0"
+            }
+            
+            
+            if stringHolder[1] != "" {
+                eq()
+                currFirst = true
+                resultLabel.text = stringHolder[0]
+                clearString(1)
+            }
+            currFirst = false
+            currOp = sender.content
+        }
+        else if sender.content == "=" {
+            eq()
+            clearString(1)
+            currFirst = true
+            resultLabel.text = stringHolder[0]
+            
+        }
     }
     
     // REQUIRED: The responder to a number or operator button being pressed.
     func buttonPressed(_ sender: CustomButton) {
-       // Fill me in!
+        // Fill me in!
+        print("\(sender.content) was pressed")
+        if sender.content == "0" && resultLabel.text != "0"{
+            if currFirst == true {
+                addCharToString(sender.content, 0)
+                updateResultLabel(stringHolder[0])
+            } else {
+                addCharToString(sender.content, 1)
+                updateResultLabel(stringHolder[1])
+            }
+        } else if sender.content == "." {
+            if currFirst == true {
+                decimal(0)
+            } else {
+                decimal(1)
+            }
+        }
     }
     
     // IMPORTANT: Do NOT change any of the code below.
@@ -123,7 +267,7 @@ class ViewController: UIViewController {
             guard let container = element as? UIView else { return }
             container.backgroundColor = UIColor.black
         }
-
+        
         let margin: CGFloat = 1.0
         let buttonWidth: CGFloat = w / 4.0
         let buttonHeight: CGFloat = 100.0
@@ -133,9 +277,9 @@ class ViewController: UIViewController {
             let x = (CGFloat(i%3) + 1.0) * margin + (CGFloat(i%3) * buttonWidth)
             let y = (CGFloat(i/3) + 1.0) * margin + (CGFloat(i/3) * buttonHeight)
             calcContainer.addUIElement(CustomButton(content: el), text: el,
-            frame: CGRect(x: x, y: y, width: buttonWidth, height: buttonHeight)) { element in
-                guard let button = element as? UIButton else { return }
-                button.addTarget(self, action: #selector(operatorPressed), for: .touchUpInside)
+                                       frame: CGRect(x: x, y: y, width: buttonWidth, height: buttonHeight)) { element in
+                                        guard let button = element as? UIButton else { return }
+                                        button.addTarget(self, action: #selector(operatorPressed), for: .touchUpInside)
             }
         }
         // MARK: Second Row 3x3
@@ -143,9 +287,9 @@ class ViewController: UIViewController {
             let x = (CGFloat(i%3) + 1.0) * margin + (CGFloat(i%3) * buttonWidth)
             let y = (CGFloat(i/3) + 1.0) * margin + (CGFloat(i/3) * buttonHeight)
             calcContainer.addUIElement(CustomButton(content: digit), text: digit,
-            frame: CGRect(x: x, y: y+101.0, width: buttonWidth, height: buttonHeight)) { element in
-                guard let button = element as? UIButton else { return }
-                button.addTarget(self, action: #selector(numberPressed), for: .touchUpInside)
+                                       frame: CGRect(x: x, y: y+101.0, width: buttonWidth, height: buttonHeight)) { element in
+                                        guard let button = element as? UIButton else { return }
+                                        button.addTarget(self, action: #selector(numberPressed), for: .touchUpInside)
             }
         }
         // MARK: Vertical Column of Operators
@@ -153,11 +297,11 @@ class ViewController: UIViewController {
             let x = (CGFloat(3) + 1.0) * margin + (CGFloat(3) * buttonWidth)
             let y = (CGFloat(i) + 1.0) * margin + (CGFloat(i) * buttonHeight)
             calcContainer.addUIElement(CustomButton(content: el), text: el,
-            frame: CGRect(x: x, y: y, width: buttonWidth, height: buttonHeight)) { element in
-                guard let button = element as? UIButton else { return }
-                button.backgroundColor = UIColor.orange
-                button.setTitleColor(UIColor.white, for: .normal)
-                button.addTarget(self, action: #selector(operatorPressed), for: .touchUpInside)
+                                       frame: CGRect(x: x, y: y, width: buttonWidth, height: buttonHeight)) { element in
+                                        guard let button = element as? UIButton else { return }
+                                        button.backgroundColor = UIColor.orange
+                                        button.setTitleColor(UIColor.white, for: .normal)
+                                        button.addTarget(self, action: #selector(operatorPressed), for: .touchUpInside)
             }
         }
         // MARK: Last Row for big 0 and .
@@ -165,12 +309,12 @@ class ViewController: UIViewController {
             let myWidth = buttonWidth * (CGFloat((i+1)%2) + 1.0) + margin * (CGFloat((i+1)%2))
             let x = (CGFloat(2*i) + 1.0) * margin + buttonWidth * (CGFloat(i*2))
             calcContainer.addUIElement(CustomButton(content: el), text: el,
-            frame: CGRect(x: x, y: 405, width: myWidth, height: buttonHeight)) { element in
-                guard let button = element as? UIButton else { return }
-                button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
+                                       frame: CGRect(x: x, y: 405, width: myWidth, height: buttonHeight)) { element in
+                                        guard let button = element as? UIButton else { return }
+                                        button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
             }
         }
     }
-
+    
 }
-
+    
