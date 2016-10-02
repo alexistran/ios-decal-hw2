@@ -236,40 +236,14 @@ class ViewController: UIViewController {
             
         }
         else if sender.content == "%" {
-            print("first - " + stringHolder[0])
-            print("second - " + stringHolder[1])
             if currFirst == true {
-//                if currFirst == ""{
-//                    stringHolder[0] =
-//                }
-                if decFirst == true && stringHolder[0][stringHolder[0].startIndex] == "0" {
-                    //add 2 0's after decimal
-                    let temp = stringHolder[0] as NSString
-                  //  temp.insertString("(", atIndex: 0)
-                    stringHolder[0] = String(temp.replacingOccurrences(of: "0.", with: "0.00"))
-                }
-//                else if {
-//                    //if a decimal already like 5.6, i need to move decimal place over 2 spots
-//                    //put something in the if
-//                }
-                else {
-                    stringHolder[0] = "0.00" + stringHolder[0]
-                    decFirst = true
-                }
+                stringHolder[0] = Helper.div(stringHolder[0], "100")
                 resultLabel.text = stringHolder[0]
+                decFirst = true
             } else if currFirst == false {
-                if decSecond == true && stringHolder[1][stringHolder[1].startIndex] == "-"{
-                    let temp = stringHolder[1] as NSString
-                    stringHolder[1] = String(temp.replacingOccurrences(of: "0.", with: "0.00"))
-                }
-//                else if {
-//                    //if a decimal already like 5.6, i need to move decimal place over 2 spots
-//                }
-                else {
-                    stringHolder[1] = "0.00" + stringHolder[1]
-                    decSecond = true
-                }
+                stringHolder[1] = Helper.div(stringHolder[1], "100")
                 resultLabel.text = stringHolder[1]
+                decSecond = true
             }
         }
     }
