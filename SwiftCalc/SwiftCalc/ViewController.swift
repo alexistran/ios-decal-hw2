@@ -27,6 +27,7 @@ class ViewController: UIViewController {
     var decSecond: Bool = false
     var currOp: String = ""
     var result: String = ""
+    //var recentPress: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,7 +79,11 @@ class ViewController: UIViewController {
     func decimal(_ stringNum: Int) {
         if resultLabel.text == "0" || stringHolder[stringNum] == "" {
             stringHolder[stringNum] = "0."
-        } else if resultLabel.text == "-0" {
+        }
+//        else if stringHolder[0] == resultLabel.text && currFirst == false{ //will this fix the problem
+//            stringHolder[1] = "0."
+//        }
+        else if resultLabel.text == "-0" {
             stringHolder[stringNum] = "-0."
         } else {
             if stringNum == 0 {
@@ -96,6 +101,11 @@ class ViewController: UIViewController {
     
     func clearString(_ stringNum: Int) {
         stringHolder[stringNum] = ""
+        if stringNum == 0 {
+            decFirst = false
+        } else if stringNum == 1 {
+            decSecond = false
+        }
     }
     func eq () {
         if currOp == "+" {
@@ -133,8 +143,11 @@ class ViewController: UIViewController {
             }
             if floor(Double(result)!) != Double(result) {
                 decFirst = true
+            } else {
+                decFirst = false
             }
         }
+
     }
     // TODO: Ensure that resultLabel gets updated.
     //       Modify this one or create your own.
@@ -167,6 +180,13 @@ class ViewController: UIViewController {
     func numberPressed(_ sender: CustomButton) {
         guard Int(sender.content) != nil else { return }
         print("The number \(sender.content) was pressed")
+        print(stringHolder[0])
+        print(stringHolder[1])
+//        if recentPress == "=" {
+//            clearString(0)
+//            clearString(1)
+//            currFirst = true
+//        }
         if currFirst == true {
             addCharToString(sender.content, 0)
             updateResultLabel(stringHolder[0])
@@ -178,6 +198,7 @@ class ViewController: UIViewController {
     
     // REQUIRED: The responder to an operator button being pressed.
     func operatorPressed(_ sender: CustomButton) {
+        //recentPress = sender.content
         print("\(sender.content) was pressed")
         if sender.content == "C" {
             if currFirst == true {
@@ -214,13 +235,56 @@ class ViewController: UIViewController {
             resultLabel.text = stringHolder[0]
             
         }
+        else if sender.content == "%" {
+            print("first - " + stringHolder[0])
+            print("second - " + stringHolder[1])
+            if currFirst == true {
+//                if currFirst == ""{
+//                    stringHolder[0] =
+//                }
+                if decFirst == true && stringHolder[0][stringHolder[0].startIndex] == "0" {
+                    //add 2 0's after decimal
+                    let temp = stringHolder[0] as NSString
+                  //  temp.insertString("(", atIndex: 0)
+                    stringHolder[0] = String(temp.replacingOccurrences(of: "0.", with: "0.00"))
+                }
+//                else if {
+//                    //if a decimal already like 5.6, i need to move decimal place over 2 spots
+//                    //put something in the if
+//                }
+                else {
+                    stringHolder[0] = "0.00" + stringHolder[0]
+                    decFirst = true
+                }
+                resultLabel.text = stringHolder[0]
+            } else if currFirst == false {
+                if decSecond == true && stringHolder[1][stringHolder[1].startIndex] == "-"{
+                    let temp = stringHolder[1] as NSString
+                    stringHolder[1] = String(temp.replacingOccurrences(of: "0.", with: "0.00"))
+                }
+//                else if {
+//                    //if a decimal already like 5.6, i need to move decimal place over 2 spots
+//                }
+                else {
+                    stringHolder[1] = "0.00" + stringHolder[1]
+                    decSecond = true
+                }
+                resultLabel.text = stringHolder[1]
+            }
+        }
     }
     
     // REQUIRED: The responder to a number or operator button being pressed.
     func buttonPressed(_ sender: CustomButton) {
         // Fill me in!
         print("\(sender.content) was pressed")
+        //recentPress = sender.content
         if sender.content == "0" && resultLabel.text != "0"{
+//            if recentPress == "=" {
+//                clearString(0)
+//                clearString(1)
+//                currFirst = true
+//            }
             if currFirst == true {
                 addCharToString(sender.content, 0)
                 updateResultLabel(stringHolder[0])
@@ -231,8 +295,10 @@ class ViewController: UIViewController {
         } else if sender.content == "." {
             if currFirst == true {
                 decimal(0)
+                decFirst = true
             } else {
                 decimal(1)
+                decSecond = true
             }
         }
     }

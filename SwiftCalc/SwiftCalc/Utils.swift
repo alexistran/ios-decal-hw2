@@ -18,19 +18,25 @@ class Helper {
     */
     
     class func add(_ first: String, _ second: String, _ decFirst: Bool, _ decSecond: Bool) -> String {
+        //check if either string is a decimal, for double addition
         if decFirst == true || decSecond == true {
-            let result: Double = Double(first)! + Double(second)!
+            let result: Double = (first as NSString).doubleValue + (second as NSString).doubleValue
             var newResult: Int = 0
+            //check if double can be converted to int
             if floor(result) == result {
                 newResult = Int(result)
                 return String(newResult)
             } else {
-                return String(result)
+            //return double
+            return String(result)
             }
-        } else if first.characters.count >= 1{
+        }
+        //integer addition
+        else if first.characters.count >= 1{
             let result: Int = Int(first)! + Int(second)!
             return String(result)
         }
+        //return empty string
         return second
     }
     
