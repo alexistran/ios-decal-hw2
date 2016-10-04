@@ -69,6 +69,7 @@ class Helper {
             }
         } else if first.characters.count >= 1{
             let result: Int = Int(first)! * Int(second)!
+            
             return String(result)
         }
         return second

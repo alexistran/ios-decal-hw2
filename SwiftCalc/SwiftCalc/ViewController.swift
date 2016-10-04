@@ -28,6 +28,7 @@ class ViewController: UIViewController {
     var currOp: String = ""
     var result: String = ""
     //var recentPress: String = ""
+    var rec: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,15 +81,19 @@ class ViewController: UIViewController {
         if resultLabel.text == "0" || stringHolder[stringNum] == "" {
             stringHolder[stringNum] = "0."
         }
-//        else if stringHolder[0] == resultLabel.text && currFirst == false{ //will this fix the problem
-//            stringHolder[1] = "0."
-//        }
         else if resultLabel.text == "-0" {
             stringHolder[stringNum] = "-0."
         } else {
             if stringNum == 0 {
                 if decFirst == false {
                     stringHolder[stringNum] += "."
+                }
+                if rec == "=" {
+                    if currFirst == true {
+                        stringHolder[0] = "0."
+                    } else {
+                        clearString(1)
+                    }
                 }
             } else if stringNum == 1 {
                 if decSecond == false {
@@ -147,6 +152,7 @@ class ViewController: UIViewController {
                 decFirst = false
             }
         }
+        
 
     }
     // TODO: Ensure that resultLabel gets updated.
@@ -180,13 +186,20 @@ class ViewController: UIViewController {
     func numberPressed(_ sender: CustomButton) {
         guard Int(sender.content) != nil else { return }
         print("The number \(sender.content) was pressed")
-        print(stringHolder[0])
-        print(stringHolder[1])
-//        if recentPress == "=" {
+        
+//        if rec == "=" {
 //            clearString(0)
 //            clearString(1)
 //            currFirst = true
 //        }
+        if rec == "=" {
+            if currFirst == true {
+                clearString(0)
+            } else {
+                clearString(1)
+            }
+        }
+        rec = sender.content
         if currFirst == true {
             addCharToString(sender.content, 0)
             updateResultLabel(stringHolder[0])
@@ -194,6 +207,9 @@ class ViewController: UIViewController {
             addCharToString(sender.content, 1)
             updateResultLabel(stringHolder[1])
         }
+        print("first" + stringHolder[0])
+        print("second" + stringHolder[1])
+        print("this is the result label: " + resultLabel.text!)
     }
     
     // REQUIRED: The responder to an operator button being pressed.
@@ -201,6 +217,7 @@ class ViewController: UIViewController {
         //recentPress = sender.content
         print("\(sender.content) was pressed")
         if sender.content == "C" {
+            rec = sender.content
             if currFirst == true {
                 clearString(0)
             } else {
@@ -217,22 +234,33 @@ class ViewController: UIViewController {
             if stringHolder[0] == "" || stringHolder[0] == "-" {
                 stringHolder[0] += "0"
             }
-            
-            
             if stringHolder[1] != "" {
                 eq()
                 currFirst = true
-                resultLabel.text = stringHolder[0]
+                if stringHolder[0].characters.count > 7 && stringHolder[0].characters.count > 0{
+                    resultLabel.text = Double(stringHolder[0])?.scientificStyle
+                } else if currFirst == true{
+                    resultLabel.text = stringHolder[0]
+                    print("here")
+                }
                 clearString(1)
             }
             currFirst = false
             currOp = sender.content
         }
         else if sender.content == "=" {
+            rec = "="
             eq()
             clearString(1)
             currFirst = true
-            resultLabel.text = stringHolder[0]
+            if stringHolder[0].characters.count > 7 && stringHolder[0].characters.count > 0{
+                resultLabel.text = Double(stringHolder[0])?.scientificStyle
+            } else {
+                resultLabel.text = stringHolder[0]
+            }
+            print("first" + stringHolder[0])
+            print("second" + stringHolder[1])
+            print("this is the result label: " + resultLabel.text!)
             
         }
         else if sender.content == "%" {
@@ -270,6 +298,7 @@ class ViewController: UIViewController {
             if currFirst == true {
                 decimal(0)
                 decFirst = true
+                rec = sender.content
             } else {
                 decimal(1)
                 decSecond = true
